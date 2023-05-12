@@ -1,0 +1,23 @@
+.container {
+  display: flex;
+}
+
+.settings {
+  width: 50px;
+  height: 50px;
+}
+
+.reset {
+  width: 50px;
+  height: 50px;
+}
+
+.time {
+  width: 50px;
+  height: 50px;
+}
+
+.turns {
+  width: 50px;
+  height: 50px;
+}

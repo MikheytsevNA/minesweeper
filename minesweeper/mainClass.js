@@ -27,28 +27,36 @@ export default class minesweeperMatrix {
   secondsCount = 0;
   turnsCounts = 0;
   flags = [];
-  constructor(n, m, initialCell) {
+  constructor(n, m) {
     this.size_x = m;
     this.size_y = n;
-    this.initialCell = initialCell;
     for (let i = 0; i < n; i++) {
       this.matrix.push([]);
       this.openedMatrix.push([]);
       for (let j = 0; j < m; j++) {
         this.matrix[i].push(0);
-        if (initialCell[0] === i && initialCell[1] === j) {
-          this.openedMatrix[i].push(1);
-        } else {
-          this.openedMatrix[i].push(-1);
-        }
+        this.openedMatrix[i].push(-1);
       }
     }
   }
 
-  fillWithMines(minesCount) {
+  setSettings(settings) {
+    this.size_x = settings.size_x;
+    this.size_y = settings.size_y;
+    this.mines = settings.mines;
+    this.initialCell = settings.initialCell;
+    this.matrix = settings.matrix;
+    this.openedMatrix = settings.openedMatrix;
+    this.secondsCount = settings.secondsCount;
+    this.turnsCounts = settings.turnsCounts;
+    this.flags = settings.flags;
+  }
+
+  fillWithMines(minesCount, initialCell) {
     if (minesCount >= this.size_x * this.size_y) {
       throw new Error("Too much mines for this field!");
     }
+    this.initialCell = initialCell;
     this.mines = minesCount;
     const listOfMines = getListOFRandomInt(
       0,
@@ -94,6 +102,8 @@ export default class minesweeperMatrix {
   makeFlag(cell) {
     if (this.openedMatrix[cell[0]][cell[1]] === -1) {
       this.openedMatrix[cell[0]][cell[1]] = -2; // -2 reserved for flags;
+    } else if (this.openedMatrix[cell[0]][cell[1]] === -2) {
+      this.openedMatrix[cell[0]][cell[1]] = -1;
     }
   }
 
@@ -106,12 +116,14 @@ export default class minesweeperMatrix {
     ) {
       this.openedMatrix[cell[0]][cell[1]] = this.matrix[cell[0]][cell[1]];
     } else if (
-      this.openedMatrix[cell[0]][cell[1]] === -1 &&
-      this.matrix[cell[0]][cell[1]] === 0
+      (this.initialCell.toString() === cell.toString() &&
+        this.matrix[cell[0]][cell[1]] === 0) ||
+      (this.openedMatrix[cell[0]][cell[1]] === -1 &&
+        this.matrix[cell[0]][cell[1]] === 0)
     ) {
       this.openedMatrix[cell[0]][cell[1]] = 0;
       for (let k = -1; k < 2; k++) {
-        // cycle all 8 cconsole.log("opened", cell)ells around i,j
+        // cycle all 8 console.log("opened", cell)ells around i,j
         for (let p = -1; p < 2; p++) {
           if (
             !(p === 0 && k === 0) &&
@@ -145,7 +157,6 @@ export default class minesweeperMatrix {
       }
     }
     if (countFlags >= this.openedMatrix[cell[0]][cell[1]]) {
-      console.log(countFlags)
       for (let k = -1; k < 2; k++) {
         for (let p = -1; p < 2; p++) {
           if (
@@ -172,18 +183,28 @@ export default class minesweeperMatrix {
     let unOpenedMines = 0;
     unOpenedMines = this.openedMatrix.reduce((accumulator, current) => {
       for (let element of current) {
-        if (element === -1) accumulator++;
+        if (element === -1 || element === -2) accumulator++;
       }
       return accumulator;
     }, 0);
-    if (this.mines === unOpenedMines) {
-      console.log("Win");
+    if (this.mines === unOpenedMines && openedMines === 0) {
       return 1;
     } else if (openedMines > 0) {
-      console.log("Deadge");
-      return 0;
+      for (let i = 0; i < this.size_y; i++) {
+        for (let j = 0; j < this.size_x; j++) {
+          if (this.openedMatrix[i][j] !== -2 && this.matrix[i][j] === 9) {
+            this.openedMatrix[i][j] = 9;
+          } else if (
+            this.openedMatrix[i][j] === -2 &&
+            this.matrix[i][j] !== 9
+          ) {
+            this.openedMatrix[i][j] = -3; // value for wrong flag
+          }
+        }
+      }
+      return 2;
     } else {
-      console.log("Not Yet");
+      //console.log("Not Yet");
     }
   }
 
