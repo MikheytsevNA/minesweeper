@@ -3,26 +3,38 @@ export {makecanvas, makeUI}
 function makeUI() {
   const container = document.createElement("div");
   container.classList = "container";
+
+  const top_panel = document.createElement("div");
+  top_panel.classList = "top_panel";
+
   const turnsCount = document.createElement("div");
   turnsCount.textContent = "0";
   turnsCount.classList = "turns";
+
   const timeCount = document.createElement("div");
   timeCount.textContent = "0";
   timeCount.classList = "time";
+
   const reset = document.createElement("img");
   reset.classList = "reset";
   reset.setAttribute("src", './reset.svg');
   reset.setAttribute("alt", 'reset');
+
   const settings = document.createElement("img");
   settings.classList = "settings";
   settings.setAttribute("src", './settings.svg');
   settings.setAttribute("alt", 'settings');
 
-  container.append(turnsCount);
-  container.append(timeCount);
-  container.append(reset);
-  container.append(settings);
+  const settingsMenu = document.createElement("div");
+  settingsMenu.classList = "settings_menu";
 
+  top_panel.append(turnsCount);
+  top_panel.append(timeCount);
+  top_panel.append(reset);
+  top_panel.append(settings);
+  top_panel.append(settingsMenu);
+
+  container.prepend(top_panel);
   document.body.prepend(container);
 }
 
@@ -32,8 +44,8 @@ function makecanvas(n, m, matrix) {
   }
   const canvas = document.createElement("canvas");
 
-  const paddingLeft = 10;
-  const paddingTop = 10;
+  const paddingLeft = 5;
+  const paddingTop = 5;
   const width = 24;
   const height = 24;
   const fontColor = [
@@ -99,7 +111,7 @@ function makecanvas(n, m, matrix) {
       }
     }
   }
-  document.body.append(canvas);
+  document.querySelector(".container").append(canvas);
 }
 
 function makeFin(x, y, width, height) {

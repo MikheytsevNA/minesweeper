@@ -3,28 +3,26 @@ import { makecanvas, makeUI } from "./makeUI.js";
 //import makeUI from "./makeUI.js";
 
 function main(reset) {
-  const n = 10;
-  const m = 10;
+  const n = 15;
+  const m = 15;
   const minesCount = 10;
   const paddingLeft = 10;
   const paddingTop = 10;
-  let nIntervId = null;
-  let time;
+  //let nIntervId = null;
   let matrix = null;
 
   let storageMatrix = getStorage();
-  if (!storageMatrix) {
-    makeUI();
+  if (reset) {
     let initialMatrix = new minesweeperMatrix(n, m);
     makecanvas(n, m, initialMatrix.openedMatrix);
-  } else if (reset) {
+  } else if (!storageMatrix) {
+    makeUI();
     let initialMatrix = new minesweeperMatrix(n, m);
     makecanvas(n, m, initialMatrix.openedMatrix);
   } else {
     makeUI();
     matrix = new minesweeperMatrix();
     matrix.setSettings(storageMatrix);
-    console.log(storageMatrix);
     const turnCounter = document.querySelector(".turns");
     const timeCounter = document.querySelector(".time");
     turnCounter.textContent = storageMatrix.turnsCounts;
@@ -41,11 +39,12 @@ function main(reset) {
     const timeCounter = document.querySelector(".time");
     if (event.button === 0) {
       leftClickHndler(event, timeCounter, turnCounter);
+      matrix.turnsCounts++;
     } else if (event.button === 2) {
       rightClickHndler(event);
     }
     turnCounter.textContent = matrix.turnsCounts;
-    matrix.turnsCounts= matrix.turnsCounts;
+    matrix.turnsCounts = matrix.turnsCounts;
   }
 
   function leftClickHndler(event, timeCounter, turnCounter) {
@@ -55,13 +54,6 @@ function main(reset) {
     let posY = event.clientY - rect.top;
     let cell = coordinatesToCell(posX, posY, 24, 24, paddingLeft, paddingTop);
     if (matrix) {
-      if (!nIntervId) {
-        nIntervId = setInterval(() => {
-          time++;
-          timeCounter.textContent = time;
-          matrix.timeCounter = time;
-        }, 1000);
-      }
       if (matrix.openedMatrix[cell[0]][cell[1]] === -1) {
         matrix.openCell(cell);
       } else if (matrix.openedMatrix[cell[0]][cell[1]] > 0) {
@@ -70,17 +62,21 @@ function main(reset) {
       let isEnd = matrix.checkWin();
       if (isEnd === 2) {
         alert("Game over. Try again");
-        clearInterval(nIntervId);
-        nIntervId = null;
+        toggleTimer(matrix);
+        timerID = null;
         matrix.openedMatrix[cell[0]][cell[1]] = 10; // 10 is value for pressed mine
       } else if (isEnd === 1) {
         alert(
           `Hooray! You found all mines in ${timeCounter.textContent} seconds and ${turnCounter.textContent} moves!`
         );
-        clearInterval(nIntervId);
-        nIntervId = null;
+        recordCheck(matrix);
+        toggleTimer(matrix);
+        timerID = null;
       }
       makecanvas(n, m, matrix.openedMatrix);
+      if (!timerID) {
+        toggleTimer(matrix);
+      }
       const canvas = document.querySelector("canvas");
       if (!isEnd) {
         canvas.addEventListener("click", clickHandler);
@@ -93,11 +89,7 @@ function main(reset) {
       matrix.openCell(cell);
       makecanvas(n, m, matrix.openedMatrix);
       time = 0;
-      nIntervId = setInterval(() => {
-        time++;
-        timeCounter.textContent = time;
-        matrix.timeCounter = time;
-      }, 1000);
+      toggleTimer(matrix);
       let isWin = matrix.checkWin();
       const canvas = document.querySelector("canvas");
       if (!isWin) {
@@ -105,11 +97,9 @@ function main(reset) {
         canvas.addEventListener("contextmenu", clickHandler);
       }
     }
-    matrix.turnsCounts++;
   }
 
   function rightClickHndler(event) {
-    matrix.turnsCounts++;
     let target = event.target;
     const rect = target.getBoundingClientRect();
     let posX = event.clientX - rect.left;
@@ -125,10 +115,10 @@ function main(reset) {
     }
     event.preventDefault();
   }
-
-  window.addEventListener('beforeunload', () => {
+  window.addEventListener("beforeunload", () => {
+    matrix.timeCounter = time;
     setStorage(matrix);
-  })
+  });
 }
 
 function coordinatesToCell(x, y, width, height, paddingLeft, paddingTop) {
@@ -152,6 +142,25 @@ function getStorage() {
   return JSON.parse(matrix);
 }
 
+function recordCheck(matrix) {}
+function toggleTimer(matrix) {
+  if (timerID || !matrix) {
+    console.log(123);
+    clearInterval(timerID);
+    timerID = null;
+  } else {
+    console.log(321);
+    timerID = setInterval(() => {
+      time++;
+      document.querySelector(".time").textContent = time;
+      matrix.timeCounter = time;
+    }, 1000);
+  }
+}
+
+let timerID = null;
+let time;
+
 main(false);
 
 const resetButton = document.querySelector(".reset");
@@ -160,9 +169,7 @@ resetButton.addEventListener("click", () => {
   timeCounter.textContent = 0;
   const turnCounter = document.querySelector(".turns");
   turnCounter.textContent = 0;
-  /* if (nIntervId) {
-    clearInterval(nIntervId);
-    nIntervId = null;
-  } */
+  toggleTimer(false);
+
   main(true);
 });
