@@ -1,4 +1,4 @@
-export {makecanvas, makeUI}
+export { makecanvas, makeUI };
 
 function makeUI() {
   const container = document.createElement("div");
@@ -7,34 +7,72 @@ function makeUI() {
   const top_panel = document.createElement("div");
   top_panel.classList = "top_panel";
 
+  const turns = document.createElement("div");
+  turns.classList = "turns_count";
+
+  const turnsText = document.createElement("div");
+  turnsText.textContent = "Moves";
+  turnsText.classList = "turns_text";
+
   const turnsCount = document.createElement("div");
   turnsCount.textContent = "0";
   turnsCount.classList = "turns";
+
+  turns.append(turnsText);
+  turns.append(turnsCount);
+
+  const time = document.createElement("div");
+  time.classList = "time_count";
+
+  const timeText = document.createElement("div");
+  timeText.textContent = "Timer";
+  timeText.classList = "time_text";
 
   const timeCount = document.createElement("div");
   timeCount.textContent = "0";
   timeCount.classList = "time";
 
+  time.append(timeText);
+  time.append(timeCount);
+
   const reset = document.createElement("img");
   reset.classList = "reset";
-  reset.setAttribute("src", './reset.svg');
-  reset.setAttribute("alt", 'reset');
+  reset.setAttribute("src", "./reset.svg");
+  reset.setAttribute("alt", "reset");
 
   const settings = document.createElement("img");
   settings.classList = "settings";
-  settings.setAttribute("src", './settings.svg');
-  settings.setAttribute("alt", 'settings');
+  settings.setAttribute("src", "./settings.svg");
+  settings.setAttribute("alt", "settings");
 
   const settingsMenu = document.createElement("div");
   settingsMenu.classList = "settings_menu";
+  const theme = document.createElement("div");
+  const difficulty = document.createElement("div");
+  const mines = document.createElement("div");
 
-  top_panel.append(turnsCount);
-  top_panel.append(timeCount);
+  const records = document.createElement("img");
+  records.classList = "records";
+  records.setAttribute("src", "./list.svg");
+  records.setAttribute("alt", "records");
+
+  const recordsList = document.createElement("ol");
+  recordsList.classList = "records_list";
+
+  const recordsListTitle = document.createElement("div")
+  recordsListTitle.textContent = "Latest records";
+  recordsListTitle.classList = "records_title"
+  recordsList.append(recordsListTitle);
+
+  top_panel.append(turns);
+  top_panel.append(time);
   top_panel.append(reset);
   top_panel.append(settings);
   top_panel.append(settingsMenu);
+  top_panel.append(records);
 
   container.prepend(top_panel);
+  container.append(recordsList);
   document.body.prepend(container);
 }
 
@@ -46,8 +84,11 @@ function makecanvas(n, m, matrix) {
 
   const paddingLeft = 5;
   const paddingTop = 5;
-  const width = 24;
-  const height = 24;
+  let width = 18;
+  let height = 18;
+  const scale = 1.5;
+  width = width * scale;
+  height = height * scale;
   const fontColor = [
     "#2d0b02",
     "#f6993f",
@@ -106,7 +147,8 @@ function makecanvas(n, m, matrix) {
           ctx,
           fontColor,
           cellBorderColor,
-          backgroundColor
+          backgroundColor,
+          scale
         );
       }
     }
@@ -116,31 +158,34 @@ function makecanvas(n, m, matrix) {
 
 function makeFin(x, y, width, height) {
   let region = new Path2D();
-  //region.strokeStyle = "#ebf206";
-  region.moveTo(x + 60 / width, y + 220 / height);
+  let startingPiontX = x - width / 6;
+  let startingPiontY = y - height / 8;
+  let scaleX = (width / 300) * 0.8;
+  let scaleY = (height / 300) * 0.8;
+  region.moveTo(startingPiontX + 60 * scaleX, startingPiontY + 220 * scaleY);
   region.bezierCurveTo(
-    x + 60 / width,
-    y + 80 / height,
-    x + 180 / width,
-    y + 20 / height,
-    x + 240 / width,
-    y + 20 / height
+    startingPiontX + 60 * scaleX,
+    startingPiontY + 80 * scaleY,
+    startingPiontX + 180 * scaleX,
+    startingPiontY + 20 * scaleY,
+    startingPiontX + 240 * scaleX,
+    startingPiontY + 20 * scaleY
   );
   region.bezierCurveTo(
-    x + 180 / width,
-    y + 100 / height,
-    x + 180 / width,
-    y + 140 / height,
-    x + 240 / width,
-    y + 220 / height
+    startingPiontX + 180 * scaleX,
+    startingPiontY + 100 * scaleY,
+    startingPiontX + 180 * scaleX,
+    startingPiontY + 140 * scaleY,
+    startingPiontX + 240 * scaleX,
+    startingPiontY + 220 * scaleY
   );
   region.bezierCurveTo(
-    x + 200 / width,
-    y + 230 / height,
-    x + 100 / width,
-    y + 230 / height,
-    x + 60 / width,
-    y + 220 / height
+    startingPiontX + 200 * scaleX,
+    startingPiontY + 230 * scaleY,
+    startingPiontX + 100 * scaleX,
+    startingPiontY + 230 * scaleY,
+    startingPiontX + 60 * scaleX,
+    startingPiontY + 220 * scaleY
   );
   return region;
 }
@@ -154,36 +199,32 @@ function cellFilling(
   ctx,
   fontColor,
   cellBorderColor,
-  backgroundColor
+  backgroundColor,
+  scale
 ) {
-  if (num === 9) { // mine
-    let region = makeFin(
-      x - width / 6,
-      y - height / 10,
-      width / 1.5,
-      height / 1.5
-    );
+  if (num === 9) {
+    // mine
+    let region = makeFin(x, y, width, height);
     ctx.fillStyle = "#6C7780";
     ctx.fill(region, "evenodd");
-  } else if (num === 10) { // red mine
+  } else if (num === 10) {
+    // red mine
     ctx.fillStyle = "#ff111f";
     ctx.fillRect(x - width / 4, y - height / 4, width, height);
-    let region = makeFin(
-      x - width / 6,
-      y - height / 10,
-      width / 1.5,
-      height / 1.5
-    );
+    let region = makeFin(x, y, width, height);
     ctx.fillStyle = "#6C7780";
     ctx.fill(region, "evenodd");
-  } else if (num > 0) { // number cell
+  } else if (num > 0) {
+    // number cell
     ctx.fillStyle = fontColor[num - 1];
-    ctx.font = "15px Aria";
-    ctx.fillText(num, x + width / 9, y + height / 2);
-  } else if (num === 0) { // empty cell
+    ctx.font = `${15 * scale}px Aria`;
+    ctx.fillText(num, x + width / 10, y + height / 2);
+  } else if (num === 0) {
+    // empty cell
     ctx.fillStyle = cellBorderColor;
     ctx.fillRect(x - width / 4, y - height / 4, width, height);
-  } else if (num === -2) { // flag cell
+  } else if (num === -2) {
+    // flag cell
     ctx.fillStyle = "#ef5f10";
     ctx.beginPath();
     ctx.arc(x + width / 4, y + height / 4, (width - 10) / 2, 0, 2 * Math.PI);
@@ -204,12 +245,13 @@ function cellFilling(
     ctx.beginPath();
     ctx.moveTo(x + width / 4, y + height / 4 + (height - 15) / 2);
     ctx.lineTo(x + width / 4, y + height / 4 + (height - 10) / 2);
-    ctx.stroke()
+    ctx.stroke();
     ctx.beginPath();
     ctx.moveTo(x + width / 4, y + height / 4 - (height - 10) / 2);
     ctx.lineTo(x + width / 4, y + height / 4 - (height - 15) / 2);
-    ctx.stroke()
-  } else if (num === -3) { // crossed flag
+    ctx.stroke();
+  } else if (num === -3) {
+    // crossed flag
     ctx.fillStyle = "#ef5f10";
     ctx.beginPath();
     ctx.arc(x + width / 4, y + height / 4, (width - 10) / 2, 0, 2 * Math.PI);

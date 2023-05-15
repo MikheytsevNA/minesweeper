@@ -2,10 +2,17 @@ import minesweeperMatrix from "./mainClass.js";
 import { makecanvas, makeUI } from "./makeUI.js";
 //import makeUI from "./makeUI.js";
 
+const n = 15;
+const m = 15;
+const minesCount = 1;
+let width = 18;
+let height = 18;
+const scale = 1.5;
+width = width * scale;
+height = height * scale;
+let record = [];
+
 function main(reset) {
-  const n = 15;
-  const m = 15;
-  const minesCount = 10;
   const paddingLeft = 10;
   const paddingTop = 10;
   //let nIntervId = null;
@@ -23,12 +30,18 @@ function main(reset) {
     makeUI();
     matrix = new minesweeperMatrix();
     matrix.setSettings(storageMatrix);
-    const turnCounter = document.querySelector(".turns");
-    const timeCounter = document.querySelector(".time");
-    turnCounter.textContent = storageMatrix.turnsCounts;
-    timeCounter.textContent = storageMatrix.timeCounter;
-    time = storageMatrix.timeCounter;
-    makecanvas(n, m, matrix.openedMatrix);
+    if (matrix.size_x < m || matrix.size_y < n) {
+      let initialMatrix = new minesweeperMatrix(n, m);
+      matrix = null;
+      makecanvas(n, m, initialMatrix.openedMatrix);
+    } else {
+      const turnCounter = document.querySelector(".turns");
+      const timeCounter = document.querySelector(".time");
+      turnCounter.textContent = storageMatrix.turnsCounts;
+      timeCounter.textContent = storageMatrix.timeCounter;
+      time = storageMatrix.timeCounter;
+      makecanvas(n, m, matrix.openedMatrix);
+    }
   }
 
   const canvas = document.querySelector("canvas");
@@ -52,31 +65,23 @@ function main(reset) {
     const rect = target.getBoundingClientRect();
     let posX = event.clientX - rect.left;
     let posY = event.clientY - rect.top;
-    let cell = coordinatesToCell(posX, posY, 24, 24, paddingLeft, paddingTop);
+    let isEnd;
+    let cell = coordinatesToCell(
+      posX,
+      posY,
+      width,
+      height,
+      paddingLeft,
+      paddingTop
+    );
     if (matrix) {
       if (matrix.openedMatrix[cell[0]][cell[1]] === -1) {
         matrix.openCell(cell);
       } else if (matrix.openedMatrix[cell[0]][cell[1]] > 0) {
         matrix.openOnFlags(cell);
       }
-      let isEnd = matrix.checkWin();
-      if (isEnd === 2) {
-        alert("Game over. Try again");
-        toggleTimer(matrix);
-        timerID = null;
-        matrix.openedMatrix[cell[0]][cell[1]] = 10; // 10 is value for pressed mine
-      } else if (isEnd === 1) {
-        alert(
-          `Hooray! You found all mines in ${timeCounter.textContent} seconds and ${turnCounter.textContent} moves!`
-        );
-        recordCheck(matrix);
-        toggleTimer(matrix);
-        timerID = null;
-      }
+      matrix, isEnd = checkEnd(matrix);
       makecanvas(n, m, matrix.openedMatrix);
-      if (!timerID) {
-        toggleTimer(matrix);
-      }
       const canvas = document.querySelector("canvas");
       if (!isEnd) {
         canvas.addEventListener("click", clickHandler);
@@ -90,9 +95,10 @@ function main(reset) {
       makecanvas(n, m, matrix.openedMatrix);
       time = 0;
       toggleTimer(matrix);
-      let isWin = matrix.checkWin();
+      matrix, isEnd = checkEnd(matrix);
+      makecanvas(n, m, matrix.openedMatrix);
       const canvas = document.querySelector("canvas");
-      if (!isWin) {
+      if (!isEnd) {
         canvas.addEventListener("click", clickHandler);
         canvas.addEventListener("contextmenu", clickHandler);
       }
@@ -104,7 +110,14 @@ function main(reset) {
     const rect = target.getBoundingClientRect();
     let posX = event.clientX - rect.left;
     let posY = event.clientY - rect.top;
-    let cell = coordinatesToCell(posX, posY, 24, 24, paddingLeft, paddingTop);
+    let cell = coordinatesToCell(
+      posX,
+      posY,
+      width,
+      height,
+      paddingLeft,
+      paddingTop
+    );
     matrix.makeFlag(cell);
     makecanvas(n, m, matrix.openedMatrix);
     let isWin = matrix.checkWin();
@@ -119,6 +132,24 @@ function main(reset) {
     matrix.timeCounter = time;
     setStorage(matrix);
   });
+}
+
+function checkEnd(matrix) {
+  let isEnd = matrix.checkWin();
+  if (isEnd === 2) {
+    alert("Game over. Try again");
+    toggleTimer(false);
+    matrix.openedMatrix[cell[0]][cell[1]] = 10; // 10 is value for pressed mine
+  } else if (isEnd === 1) {
+    alert(
+      `Hooray! You found all mines in ${time} seconds and ${matrix.turnsCounts + 1} moves!`
+    );
+    recordChange(matrix);
+    toggleTimer(false);
+  } else if (!timerID) {
+    toggleTimer(matrix);
+  }
+  return matrix, isEnd;
 }
 
 function coordinatesToCell(x, y, width, height, paddingLeft, paddingTop) {
@@ -142,14 +173,37 @@ function getStorage() {
   return JSON.parse(matrix);
 }
 
-function recordCheck(matrix) {}
+function recordChange(matrix) {
+  record.unshift({
+    size_x: matrix.size_x,
+    size_y: matrix.size_y,
+    time: matrix.timeCounter,
+    turn: matrix.turnsCounts+1,
+  });
+  recordMakeNewItem(record[0]);
+}
+
+function recordMakeNewItem(item) {
+  let recordList = document.querySelector(".records_list");
+  if (record.length > 10) {
+    record.pop();
+    recordList.removeChild(recordList.lastChild);
+  }
+  let recordTitle = document.querySelector(".records_title");
+  const recordItem = document.createElement("li");
+  if (!item.time) {
+    item.time = 0;
+  }
+  recordItem.textContent = `Field: ${item.size_y}x${item.size_x}, Time: ${item.time}s, Moves: ${item.turn}`;
+  recordItem.classList = "record_item";
+  recordTitle.after(recordItem);
+}
+
 function toggleTimer(matrix) {
   if (timerID || !matrix) {
-    console.log(123);
     clearInterval(timerID);
     timerID = null;
   } else {
-    console.log(321);
     timerID = setInterval(() => {
       time++;
       document.querySelector(".time").textContent = time;
@@ -172,4 +226,10 @@ resetButton.addEventListener("click", () => {
   toggleTimer(false);
 
   main(true);
+});
+
+const recordButton = document.querySelector(".records");
+const recordList = document.querySelector(".records_list");
+recordButton.addEventListener("click", () => {
+  recordList.classList.toggle("records_list_active");
 });

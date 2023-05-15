@@ -1,10 +1,13 @@
 .container {
-  margin: 0 auto;
-  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .top_panel {
+  width: 500px;
   display: flex;
+  justify-content: space-around;
 }
 
 .settings {
@@ -28,12 +31,31 @@
   height: 50px;
 }
 
-.time {
+.time_count {
   width: 50px;
   height: 50px;
 }
 
-.turns {
+.turns_count {
   width: 50px;
   height: 50px;
+}
+
+.records {
+  width: 50px;
+  height: 50px;
+}
+
+.records_list {
+  display: none;
+  position: absolute;
+  top: 0;
+  width: 300px;
+  height: auto;
+  background-color: white;
+  color: black;
+}
+
+.records_list.records_list_active {
+  display: block;
 }
