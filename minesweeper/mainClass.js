@@ -187,7 +187,7 @@ export default class minesweeperMatrix {
       }
       return accumulator;
     }, 0);
-    if (this.mines === unOpenedMines && openedMines === 0) {
+    if (this.mines == unOpenedMines && openedMines === 0) {
       return 1;
     } else if (openedMines > 0) {
       for (let i = 0; i < this.size_y; i++) {

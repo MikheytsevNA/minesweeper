@@ -2,12 +2,12 @@ import minesweeperMatrix from "./mainClass.js";
 import { makecanvas, makeUI } from "./makeUI.js";
 //import makeUI from "./makeUI.js";
 
-const n = 15;
-const m = 15;
-const minesCount = 1;
+let n = 25;
+let m = 25;
+let minesCount = 1;
 let width = 18;
 let height = 18;
-const scale = 1.5;
+let scale = 1;
 width = width * scale;
 height = height * scale;
 let record = [];
@@ -18,29 +18,31 @@ function main(reset) {
   //let nIntervId = null;
   let matrix = null;
 
-  let storageMatrix = getStorage();
+  let [storageMatrix, storageState] = getStorage();
   if (reset) {
     let initialMatrix = new minesweeperMatrix(n, m);
-    makecanvas(n, m, initialMatrix.openedMatrix);
+    makecanvas(n, m, scale, initialMatrix.openedMatrix);
   } else if (!storageMatrix) {
-    makeUI();
+    makeUI(state);
     let initialMatrix = new minesweeperMatrix(n, m);
-    makecanvas(n, m, initialMatrix.openedMatrix);
+    makecanvas(n, m, scale, initialMatrix.openedMatrix);
   } else {
-    makeUI();
+    state = storageState;
+    applyState(state);
+    makeUI(state);
     matrix = new minesweeperMatrix();
     matrix.setSettings(storageMatrix);
     if (matrix.size_x < m || matrix.size_y < n) {
       let initialMatrix = new minesweeperMatrix(n, m);
       matrix = null;
-      makecanvas(n, m, initialMatrix.openedMatrix);
+      makecanvas(n, m, scale, initialMatrix.openedMatrix);
     } else {
       const turnCounter = document.querySelector(".turns");
       const timeCounter = document.querySelector(".time");
       turnCounter.textContent = storageMatrix.turnsCounts;
       timeCounter.textContent = storageMatrix.timeCounter;
       time = storageMatrix.timeCounter;
-      makecanvas(n, m, matrix.openedMatrix);
+      makecanvas(n, m, scale, matrix.openedMatrix);
     }
   }
 
@@ -80,8 +82,8 @@ function main(reset) {
       } else if (matrix.openedMatrix[cell[0]][cell[1]] > 0) {
         matrix.openOnFlags(cell);
       }
-      matrix, isEnd = checkEnd(matrix);
-      makecanvas(n, m, matrix.openedMatrix);
+      matrix, isEnd = checkEnd(matrix, cell);
+      makecanvas(n, m, scale, matrix.openedMatrix);
       const canvas = document.querySelector("canvas");
       if (!isEnd) {
         canvas.addEventListener("click", clickHandler);
@@ -92,11 +94,11 @@ function main(reset) {
       matrix.fillWithMines(minesCount, cell);
       matrix.fillRestOfField();
       matrix.openCell(cell);
-      makecanvas(n, m, matrix.openedMatrix);
+      makecanvas(n, m, scale, matrix.openedMatrix);
       time = 0;
       toggleTimer(matrix);
-      matrix, isEnd = checkEnd(matrix);
-      makecanvas(n, m, matrix.openedMatrix);
+      matrix, isEnd = checkEnd(matrix, cell);
+      makecanvas(n, m, scale, matrix.openedMatrix);
       const canvas = document.querySelector("canvas");
       if (!isEnd) {
         canvas.addEventListener("click", clickHandler);
@@ -119,7 +121,7 @@ function main(reset) {
       paddingTop
     );
     matrix.makeFlag(cell);
-    makecanvas(n, m, matrix.openedMatrix);
+    makecanvas(n, m, scale, matrix.openedMatrix);
     let isWin = matrix.checkWin();
     const canvas = document.querySelector("canvas");
     if (!isWin) {
@@ -130,11 +132,12 @@ function main(reset) {
   }
   window.addEventListener("beforeunload", () => {
     matrix.timeCounter = time;
-    setStorage(matrix);
+    console.log(state);
+    setStorage(matrix, state);
   });
 }
 
-function checkEnd(matrix) {
+function checkEnd(matrix, cell) {
   let isEnd = matrix.checkWin();
   if (isEnd === 2) {
     alert("Game over. Try again");
@@ -159,10 +162,12 @@ function coordinatesToCell(x, y, width, height, paddingLeft, paddingTop) {
   ];
 }
 
-function setStorage(matrix) {
+function setStorage(matrix, state) {
   let jsonMatrix = JSON.stringify(matrix);
+  let jsonState = JSON.stringify(state);
   try {
     localStorage.setItem("matrix", jsonMatrix);
+    localStorage.setItem("state", jsonState);
   } catch (err) {
     throw err;
   }
@@ -170,7 +175,8 @@ function setStorage(matrix) {
 
 function getStorage() {
   let matrix = localStorage.getItem("matrix");
-  return JSON.parse(matrix);
+  let state = localStorage.getItem("state");
+  return [JSON.parse(matrix), JSON.parse(state)];
 }
 
 function recordChange(matrix) {
@@ -215,10 +221,17 @@ function toggleTimer(matrix) {
 let timerID = null;
 let time;
 
+let state = {
+  difficulty: "easy",
+  mines: 10,
+  theme: "light"
+}
+
 main(false);
 
 const resetButton = document.querySelector(".reset");
 resetButton.addEventListener("click", () => {
+  applyState(state);
   const timeCounter = document.querySelector(".time");
   timeCounter.textContent = 0;
   const turnCounter = document.querySelector(".turns");
@@ -228,8 +241,59 @@ resetButton.addEventListener("click", () => {
   main(true);
 });
 
+function applyState(state) {
+  switch (state.difficulty) {
+    case "easy":
+      n = 10;
+      m = 10;
+      scale = 2;
+      break;
+    case "medium":
+      n = 15;
+      m = 15;
+      scale = 1.5
+      break;
+    case "hard":
+      n = 25;
+      m = 25;
+      scale = 1;
+      break;
+  }
+  width = 18 * scale;
+  height = 18 * scale;
+  
+  minesCount = state.mines;
+
+  if (state.theme === 'light') {}
+}
+
 const recordButton = document.querySelector(".records");
 const recordList = document.querySelector(".records_list");
 recordButton.addEventListener("click", () => {
   recordList.classList.toggle("records_list_active");
 });
+
+const settingsButton = document.querySelector(".settings");
+const settingsList = document.querySelector(".settings_menu");
+settingsButton.addEventListener("click", () => {
+  settingsList.classList.toggle("settings_menu_active");
+});
+let slider = document.querySelector(".mines_slider");
+let output = document.querySelector(".mines_value");
+output.textContent = slider.value + " mines";
+slider.addEventListener("input", (event) => {
+  output.textContent = event.target.value  + " mines";
+  state.mines = event.target.value;
+});
+
+let difRadio = document.querySelector(".difficulty");
+difRadio.addEventListener("change", (event) => {
+  state.difficulty = event.target.value;
+})
+
+let themeRadio = document.querySelector(".theme");
+themeRadio.addEventListener("change", (event) => {
+  state.theme = event.target.value;
+})
+
+

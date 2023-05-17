@@ -16,14 +16,17 @@
 }
 
 .settings_menu {
-  width: 50px;
-  height: 50px;
-  background-color: bisque;
   display: none;
+  position: absolute;
+  top: 58px;
+  width: 300px;
+  height: auto;
+  background-color: white;
+  color: black;
 }
 
-.settings_menu.active {
-  display:block;
+.settings_menu.settings_menu_active {
+  display: block;
 }
 
 .reset {
@@ -49,8 +52,9 @@
 .records_list {
   display: none;
   position: absolute;
-  top: 0;
+  top: 58px;
   width: 300px;
+  margin: 0;
   height: auto;
   background-color: white;
   color: black;

@@ -1,6 +1,6 @@
 export { makecanvas, makeUI };
 
-function makeUI() {
+function makeUI(currentState) {
   const container = document.createElement("div");
   container.classList = "container";
 
@@ -47,9 +47,105 @@ function makeUI() {
 
   const settingsMenu = document.createElement("div");
   settingsMenu.classList = "settings_menu";
+
   const theme = document.createElement("div");
+  theme.classList = "theme";
+  const lightTheme = document.createElement("input");
+  lightTheme.setAttribute("type", "radio");
+  lightTheme.setAttribute("name", "theme");
+  lightTheme.setAttribute("value", "light");
+  lightTheme.setAttribute("id", "light_difficulty");
+  const lightLabel = document.createElement("label");
+  lightLabel.setAttribute("for", "light_difficulty");
+  lightLabel.textContent = "Light";
+
+  const darkTheme = document.createElement("input");
+  darkTheme.setAttribute("type", "radio");
+  darkTheme.setAttribute("name", "theme");
+  darkTheme.setAttribute("value", "dark");
+  darkTheme.setAttribute("id", "dark_difficulty");
+  const darkLabel = document.createElement("label");
+  darkLabel.setAttribute("for", "dark_difficulty");
+  darkLabel.textContent = "Dark";
+
+  switch (currentState.theme) {
+    case "light":
+      lightTheme.checked = true;
+      break;
+    case "dark":
+      darkTheme.checked = true;
+      break;
+  }
+
+  theme.append(lightTheme);
+  theme.append(lightLabel);
+
+  theme.append(darkTheme);
+  theme.append(darkLabel);
+
   const difficulty = document.createElement("div");
+  difficulty.classList = "difficulty";
+  const easyDif = document.createElement("input");
+  easyDif.setAttribute("type", "radio");
+  easyDif.setAttribute("name", "difficulty");
+  easyDif.setAttribute("value", "easy");
+  easyDif.setAttribute("id", "easy_difficulty");
+  const easyLabel = document.createElement("label");
+  easyLabel.setAttribute("for", "easy_difficulty");
+  easyLabel.textContent = "Easy";
+
+  const mediumDif = document.createElement("input");
+  mediumDif.setAttribute("type", "radio");
+  mediumDif.setAttribute("name", "difficulty");
+  mediumDif.setAttribute("value", "medium");
+  mediumDif.setAttribute("id", "medium_difficulty");
+  const mediumLabel = document.createElement("label");
+  mediumLabel.setAttribute("for", "medium_difficulty");
+  mediumLabel.textContent = "Medium";
+
+  const hardDif = document.createElement("input");
+  hardDif.setAttribute("type", "radio");
+  hardDif.setAttribute("name", "difficulty");
+  hardDif.setAttribute("value", "hard");
+  hardDif.setAttribute("id", "hard_difficulty");
+  const hardLabel = document.createElement("label");
+  hardLabel.setAttribute("for", "hard_difficulty");
+  hardLabel.textContent = "Hard";
+
+  switch (currentState.difficulty) {
+    case "easy":
+      easyDif.checked = true;
+      break;
+    case "medium":
+      mediumDif.checked = true;
+      break;
+    case "hard":
+      hardDif.checked = true;
+      break;
+  }
+
+  difficulty.append(easyDif);
+  difficulty.append(easyLabel);
+  difficulty.append(mediumDif);
+  difficulty.append(mediumLabel);
+  difficulty.append(hardDif);
+  difficulty.append(hardLabel);
+
   const mines = document.createElement("div");
+  mines.classList = "mines"
+  const minesSlider = document.createElement("input");
+  minesSlider.setAttribute("type", "range");
+  minesSlider.setAttribute("min", 10);
+  minesSlider.setAttribute("max", 99);
+  minesSlider.setAttribute("value", currentState.mines);
+  minesSlider.classList = "mines_slider";
+  const minesValue = document.createElement("span");
+  minesValue.classList = "mines_value";
+  mines.append(minesSlider);
+  mines.append(minesValue);
+  settingsMenu.append(theme);
+  settingsMenu.append(difficulty);
+  settingsMenu.append(mines);
 
   const records = document.createElement("img");
   records.classList = "records";
@@ -76,7 +172,7 @@ function makeUI() {
   document.body.prepend(container);
 }
 
-function makecanvas(n, m, matrix) {
+function makecanvas(n, m, scale, matrix) {
   if (document.querySelector("canvas")) {
     document.querySelector("canvas").remove("canvas");
   }
@@ -86,7 +182,7 @@ function makecanvas(n, m, matrix) {
   const paddingTop = 5;
   let width = 18;
   let height = 18;
-  const scale = 1.5;
+  //const scale = 1.5;
   width = width * scale;
   height = height * scale;
   const fontColor = [
