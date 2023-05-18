@@ -1,6 +1,5 @@
 import minesweeperMatrix from "./mainClass.js";
 import { makecanvas, makeUI } from "./makeUI.js";
-//import makeUI from "./makeUI.js";
 
 let n = 25;
 let m = 25;
@@ -8,24 +7,61 @@ let minesCount = 1;
 let width = 18;
 let height = 18;
 let scale = 1;
+let colors = "light"
 width = width * scale;
 height = height * scale;
 let record = [];
 
+const colorsLight = {
+  cellColors: ["#f2f8fe", "#0a7cf5", "#ebf206"],
+  mineColors: ["#6C7780", "#ff111f"],
+  numFontColor: [
+    "#2d0b02",
+    "#f6993f",
+    "#5e4f02",
+    "#38c172",
+    "#4dc0b5",
+    "#3490dc",
+    "#6574cd",
+    "#9561e2",
+  ],
+  flagColors: ["#ef5f10", "#fff", "#ff111f"],
+  background: "#fff",
+  counters: ["#fff", "#000"]
+};
+
+const colorsDark = {
+  cellColors: ["#1d131f", "#27a49d", "#f6f6f8"],
+  mineColors: ["#D3D3D3", "#ff111f"],
+  numFontColor: [
+    "#fff",
+    "#f6993f",
+    "#cfaa0b",
+    "#38c172",
+    "#4dc0b5",
+    "#3490dc",
+    "#6574cd",
+    "#9561e2",
+  ],
+  flagColors: ["#ef5f10", "#fff", "#ff111f"],
+  background: "#000",
+  counters: ["#000", "#fff"]
+};
+
 function main(reset) {
-  const paddingLeft = 10;
-  const paddingTop = 10;
+  const paddingLeft = 5;
+  const paddingTop = 5;
   //let nIntervId = null;
   let matrix = null;
 
   let [storageMatrix, storageState] = getStorage();
   if (reset) {
     let initialMatrix = new minesweeperMatrix(n, m);
-    makecanvas(n, m, scale, initialMatrix.openedMatrix);
+    makecanvas(n, m, scale, initialMatrix.openedMatrix, colors);
   } else if (!storageMatrix) {
     makeUI(state);
     let initialMatrix = new minesweeperMatrix(n, m);
-    makecanvas(n, m, scale, initialMatrix.openedMatrix);
+    makecanvas(n, m, scale, initialMatrix.openedMatrix, colors);
   } else {
     state = storageState;
     applyState(state);
@@ -35,14 +71,14 @@ function main(reset) {
     if (matrix.size_x < m || matrix.size_y < n) {
       let initialMatrix = new minesweeperMatrix(n, m);
       matrix = null;
-      makecanvas(n, m, scale, initialMatrix.openedMatrix);
+      makecanvas(n, m, scale, initialMatrix.openedMatrix, colors);
     } else {
       const turnCounter = document.querySelector(".turns");
       const timeCounter = document.querySelector(".time");
       turnCounter.textContent = storageMatrix.turnsCounts;
       timeCounter.textContent = storageMatrix.timeCounter;
       time = storageMatrix.timeCounter;
-      makecanvas(n, m, scale, matrix.openedMatrix);
+      makecanvas(n, m, scale, matrix.openedMatrix,colors);
     }
   }
 
@@ -83,7 +119,7 @@ function main(reset) {
         matrix.openOnFlags(cell);
       }
       matrix, isEnd = checkEnd(matrix, cell);
-      makecanvas(n, m, scale, matrix.openedMatrix);
+      makecanvas(n, m, scale, matrix.openedMatrix,colors);
       const canvas = document.querySelector("canvas");
       if (!isEnd) {
         canvas.addEventListener("click", clickHandler);
@@ -94,11 +130,11 @@ function main(reset) {
       matrix.fillWithMines(minesCount, cell);
       matrix.fillRestOfField();
       matrix.openCell(cell);
-      makecanvas(n, m, scale, matrix.openedMatrix);
+      makecanvas(n, m, scale, matrix.openedMatrix, colors);
       time = 0;
       toggleTimer(matrix);
       matrix, isEnd = checkEnd(matrix, cell);
-      makecanvas(n, m, scale, matrix.openedMatrix);
+      makecanvas(n, m, scale, matrix.openedMatrix, colors);
       const canvas = document.querySelector("canvas");
       if (!isEnd) {
         canvas.addEventListener("click", clickHandler);
@@ -121,7 +157,7 @@ function main(reset) {
       paddingTop
     );
     matrix.makeFlag(cell);
-    makecanvas(n, m, scale, matrix.openedMatrix);
+    makecanvas(n, m, scale, matrix.openedMatrix,colors);
     let isWin = matrix.checkWin();
     const canvas = document.querySelector("canvas");
     if (!isWin) {
@@ -132,7 +168,6 @@ function main(reset) {
   }
   window.addEventListener("beforeunload", () => {
     matrix.timeCounter = time;
-    console.log(state);
     setStorage(matrix, state);
   });
 }
@@ -229,18 +264,6 @@ let state = {
 
 main(false);
 
-const resetButton = document.querySelector(".reset");
-resetButton.addEventListener("click", () => {
-  applyState(state);
-  const timeCounter = document.querySelector(".time");
-  timeCounter.textContent = 0;
-  const turnCounter = document.querySelector(".turns");
-  turnCounter.textContent = 0;
-  toggleTimer(false);
-
-  main(true);
-});
-
 function applyState(state) {
   switch (state.difficulty) {
     case "easy":
@@ -264,36 +287,55 @@ function applyState(state) {
   
   minesCount = state.mines;
 
-  if (state.theme === 'light') {}
+  if (state.theme === 'light') {
+    colors = colorsLight;
+  } else {
+    colors = colorsDark;
+  }
 }
 
-const recordButton = document.querySelector(".records");
-const recordList = document.querySelector(".records_list");
-recordButton.addEventListener("click", () => {
-  recordList.classList.toggle("records_list_active");
-});
+function eventListenersHandler() {
+  const resetButton = document.querySelector(".reset");
+  resetButton.addEventListener("click", () => {
+    applyState(state);
+    const timeCounter = document.querySelector(".time");
+    timeCounter.textContent = 0;
+    const turnCounter = document.querySelector(".turns");
+    turnCounter.textContent = 0;
+    toggleTimer(false);
+    makeUI(state);
+    eventListenersHandler();
+    main(true);
+  });
 
-const settingsButton = document.querySelector(".settings");
-const settingsList = document.querySelector(".settings_menu");
-settingsButton.addEventListener("click", () => {
-  settingsList.classList.toggle("settings_menu_active");
-});
-let slider = document.querySelector(".mines_slider");
-let output = document.querySelector(".mines_value");
-output.textContent = slider.value + " mines";
-slider.addEventListener("input", (event) => {
-  output.textContent = event.target.value  + " mines";
-  state.mines = event.target.value;
-});
+  const recordButton = document.querySelector(".records");
+  const recordList = document.querySelector(".records_list");
+  recordButton.addEventListener("click", () => {
+    recordList.classList.toggle("records_list_active");
+  });
 
-let difRadio = document.querySelector(".difficulty");
-difRadio.addEventListener("change", (event) => {
-  state.difficulty = event.target.value;
-})
+  const settingsButton = document.querySelector(".settings");
+  const settingsList = document.querySelector(".settings_menu");
+  settingsButton.addEventListener("click", () => {
+    settingsList.classList.toggle("settings_menu_active");
+  });
+  let slider = document.querySelector(".mines_slider");
+  let output = document.querySelector(".mines_value");
+  output.textContent = slider.value + " mines";
+  slider.addEventListener("input", (event) => {
+    output.textContent = event.target.value  + " mines";
+    state.mines = event.target.value;
+  });
 
-let themeRadio = document.querySelector(".theme");
-themeRadio.addEventListener("change", (event) => {
-  state.theme = event.target.value;
-})
+  let difRadio = document.querySelector(".difficulty");
+  difRadio.addEventListener("change", (event) => {
+    state.difficulty = event.target.value;
+  })
 
+  let themeRadio = document.querySelector(".theme");
+  themeRadio.addEventListener("change", (event) => {
+    state.theme = event.target.value;
+  })
+}
+eventListenersHandler();
 

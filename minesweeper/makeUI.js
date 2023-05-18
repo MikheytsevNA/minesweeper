@@ -1,6 +1,10 @@
 export { makecanvas, makeUI };
 
 function makeUI(currentState) {
+  if (document.querySelector(".container")) {
+    document.querySelector(".container").remove(".container");
+  }
+
   const container = document.createElement("div");
   container.classList = "container";
 
@@ -17,7 +21,13 @@ function makeUI(currentState) {
   const turnsCount = document.createElement("div");
   turnsCount.textContent = "0";
   turnsCount.classList = "turns";
-
+  if (currentState.theme === "light") {
+    turns.style.backgroundColor = "#fff";
+    turns.style.color = "#000";
+  } else {
+    turns.style.backgroundColor = "#000";
+    turns.style.color = "#fff";
+  }
   turns.append(turnsText);
   turns.append(turnsCount);
 
@@ -31,18 +41,33 @@ function makeUI(currentState) {
   const timeCount = document.createElement("div");
   timeCount.textContent = "0";
   timeCount.classList = "time";
-
+  if (currentState.theme === "light") {
+    time.style.backgroundColor = "#fff";
+    time.style.color = "#000";
+  } else {
+    time.style.backgroundColor = "#000";
+    time.style.color = "#fff";
+  }
   time.append(timeText);
   time.append(timeCount);
 
   const reset = document.createElement("img");
   reset.classList = "reset";
-  reset.setAttribute("src", "./reset.svg");
+  if (currentState.theme === "light") {
+    reset.setAttribute("src", "./reset.svg");
+  } else {
+    reset.setAttribute("src", "./reset_dark.svg");
+  }
+
   reset.setAttribute("alt", "reset");
 
   const settings = document.createElement("img");
   settings.classList = "settings";
-  settings.setAttribute("src", "./settings.svg");
+  if (currentState.theme === "light") {
+    settings.setAttribute("src", "./settings.svg");
+  } else {
+    settings.setAttribute("src", "./settings_dark.svg");
+  }
   settings.setAttribute("alt", "settings");
 
   const settingsMenu = document.createElement("div");
@@ -132,7 +157,7 @@ function makeUI(currentState) {
   difficulty.append(hardLabel);
 
   const mines = document.createElement("div");
-  mines.classList = "mines"
+  mines.classList = "mines";
   const minesSlider = document.createElement("input");
   minesSlider.setAttribute("type", "range");
   minesSlider.setAttribute("min", 10);
@@ -149,15 +174,19 @@ function makeUI(currentState) {
 
   const records = document.createElement("img");
   records.classList = "records";
-  records.setAttribute("src", "./list.svg");
+  if (currentState.theme === "light") {
+    records.setAttribute("src", "./list.svg");
+  } else {
+    records.setAttribute("src", "./list_dark.svg");
+  }
   records.setAttribute("alt", "records");
 
   const recordsList = document.createElement("ol");
   recordsList.classList = "records_list";
 
-  const recordsListTitle = document.createElement("div")
+  const recordsListTitle = document.createElement("div");
   recordsListTitle.textContent = "Latest records";
-  recordsListTitle.classList = "records_title"
+  recordsListTitle.classList = "records_title";
   recordsList.append(recordsListTitle);
 
   top_panel.append(turns);
@@ -172,51 +201,44 @@ function makeUI(currentState) {
   document.body.prepend(container);
 }
 
-function makecanvas(n, m, scale, matrix) {
+function makecanvas(n, m, scale, matrix, colors) {
   if (document.querySelector("canvas")) {
     document.querySelector("canvas").remove("canvas");
   }
+  const container = document.querySelector(".container")
+  document.body.style.backgroundColor = colors.background;
   const canvas = document.createElement("canvas");
 
   const paddingLeft = 5;
   const paddingTop = 5;
   let width = 18;
   let height = 18;
-  //const scale = 1.5;
   width = width * scale;
   height = height * scale;
-  const fontColor = [
-    "#2d0b02",
-    "#f6993f",
-    "#5e4f02",
-    "#38c172",
-    "#4dc0b5",
-    "#3490dc",
-    "#6574cd",
-    "#9561e2",
-  ];
-  const backgroundColor = "#f2f8fe";
-  const cellBorderColor = "#0a7cf5";
-  const hightlightColor = "#ebf206";
 
   canvas.setAttribute("width", width * m + paddingLeft * 2);
   canvas.setAttribute("height", height * n + paddingTop * 2);
 
   if (canvas.getContext) {
     const ctx = canvas.getContext("2d");
-    ctx.fillStyle = backgroundColor;
-    ctx.fillRect(0, 0, 300, 300);
+    ctx.fillStyle = colors.cellColors[0];
+    ctx.fillRect(
+      0,
+      0,
+      2 * paddingLeft + width * m,
+      2 * paddingTop + height * n
+    );
 
     for (let i = 0; i < n; i++) {
       for (let j = 0; j < m; j++) {
-        ctx.fillStyle = cellBorderColor;
+        ctx.fillStyle = colors.cellColors[1];
         ctx.fillRect(
           paddingLeft + width * j,
           paddingTop + height * i,
           width,
           height
         );
-        ctx.fillStyle = backgroundColor;
+        ctx.fillStyle = colors.cellColors[0];
         ctx.fillRect(
           paddingLeft + 2 + width * j,
           paddingTop + 2 + height * i,
@@ -224,7 +246,7 @@ function makecanvas(n, m, scale, matrix) {
           height - 4
         );
         ctx.beginPath();
-        ctx.strokeStyle = hightlightColor;
+        ctx.strokeStyle = colors.cellColors[2];
         ctx.moveTo(paddingLeft + width * (j + 1), paddingTop + height * i);
         ctx.lineTo(paddingLeft + width * j, paddingTop + height * i);
         ctx.lineTo(paddingLeft + width * j, paddingTop + height * (i + 1));
@@ -241,9 +263,11 @@ function makecanvas(n, m, scale, matrix) {
           height,
           matrix[i][j],
           ctx,
-          fontColor,
-          cellBorderColor,
-          backgroundColor,
+          colors.numFontColor,
+          colors.mineColors,
+          colors.flagColors,
+          colors.cellColors[1],
+          colors.cellColors[0],
           scale
         );
       }
@@ -294,6 +318,8 @@ function cellFilling(
   num,
   ctx,
   fontColor,
+  mineColors,
+  flagColors,
   cellBorderColor,
   backgroundColor,
   scale
@@ -301,14 +327,14 @@ function cellFilling(
   if (num === 9) {
     // mine
     let region = makeFin(x, y, width, height);
-    ctx.fillStyle = "#6C7780";
+    ctx.fillStyle = mineColors[0];
     ctx.fill(region, "evenodd");
   } else if (num === 10) {
     // red mine
-    ctx.fillStyle = "#ff111f";
+    ctx.fillStyle = mineColors[1];
     ctx.fillRect(x - width / 4, y - height / 4, width, height);
     let region = makeFin(x, y, width, height);
-    ctx.fillStyle = "#6C7780";
+    ctx.fillStyle = mineColors[0];
     ctx.fill(region, "evenodd");
   } else if (num > 0) {
     // number cell
@@ -321,7 +347,7 @@ function cellFilling(
     ctx.fillRect(x - width / 4, y - height / 4, width, height);
   } else if (num === -2) {
     // flag cell
-    ctx.fillStyle = "#ef5f10";
+    ctx.fillStyle = flagColors[0];
     ctx.beginPath();
     ctx.arc(x + width / 4, y + height / 4, (width - 10) / 2, 0, 2 * Math.PI);
     ctx.fill();
@@ -330,7 +356,7 @@ function cellFilling(
     ctx.arc(x + width / 4, y + height / 4, (width - 15) / 2, 0, 2 * Math.PI);
     ctx.fill();
     ctx.beginPath();
-    ctx.strokeStyle = "#fff";
+    ctx.strokeStyle = flagColors[1];
     ctx.moveTo(x + width / 4 - (width - 10) / 2, y + height / 4);
     ctx.lineTo(x + width / 4 - (width - 15) / 2, y + height / 4);
     ctx.stroke();
@@ -348,7 +374,7 @@ function cellFilling(
     ctx.stroke();
   } else if (num === -3) {
     // crossed flag
-    ctx.fillStyle = "#ef5f10";
+    ctx.fillStyle = flagColors[0];
     ctx.beginPath();
     ctx.arc(x + width / 4, y + height / 4, (width - 10) / 2, 0, 2 * Math.PI);
     ctx.fill();
@@ -358,7 +384,25 @@ function cellFilling(
     ctx.fill();
 
     ctx.beginPath();
-    ctx.strokeStyle = "#ff111f";
+    ctx.strokeStyle = flagColors[1];
+    ctx.moveTo(x + width / 4 - (width - 10) / 2, y + height / 4);
+    ctx.lineTo(x + width / 4 - (width - 15) / 2, y + height / 4);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x + width / 4 + (width - 15) / 2, y + height / 4);
+    ctx.lineTo(x + width / 4 + (width - 10) / 2, y + height / 4);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x + width / 4, y + height / 4 + (height - 15) / 2);
+    ctx.lineTo(x + width / 4, y + height / 4 + (height - 10) / 2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x + width / 4, y + height / 4 - (height - 10) / 2);
+    ctx.lineTo(x + width / 4, y + height / 4 - (height - 15) / 2);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.strokeStyle = flagColors[2];
     ctx.moveTo(x - 1, y + height / 2 + 1);
     ctx.lineTo(x + width / 2 + 1, y - 1);
     ctx.moveTo(x + width / 2 + 1, y + height / 2 + 1);
