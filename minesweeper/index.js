@@ -48,6 +48,10 @@ const colorsDark = {
   counters: ["#000", "#fff"]
 };
 
+const audioWin = new Audio("./Win.mp3");
+const audioLose = new Audio("./Lose.mp3");
+const audioOpen = new Audio("./Open.mp3");
+
 function main(reset) {
   const paddingLeft = 5;
   const paddingTop = 5;
@@ -112,6 +116,7 @@ function main(reset) {
       paddingLeft,
       paddingTop
     );
+    audioOpen.play();
     if (matrix) {
       if (matrix.openedMatrix[cell[0]][cell[1]] === -1) {
         matrix.openCell(cell);
@@ -175,10 +180,12 @@ function main(reset) {
 function checkEnd(matrix, cell) {
   let isEnd = matrix.checkWin();
   if (isEnd === 2) {
+    audioLose.play();
     alert("Game over. Try again");
     toggleTimer(false);
     matrix.openedMatrix[cell[0]][cell[1]] = 10; // 10 is value for pressed mine
   } else if (isEnd === 1) {
+    audioWin.play();
     alert(
       `Hooray! You found all mines in ${time} seconds and ${matrix.turnsCounts + 1} moves!`
     );
@@ -263,6 +270,7 @@ let state = {
 }
 
 main(false);
+eventListenersHandler();
 
 function applyState(state) {
   switch (state.difficulty) {
@@ -337,5 +345,4 @@ function eventListenersHandler() {
     state.theme = event.target.value;
   })
 }
-eventListenersHandler();
 
