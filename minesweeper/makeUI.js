@@ -189,6 +189,12 @@ function makeUI(currentState) {
   recordsListTitle.classList = "records_title";
   recordsList.append(recordsListTitle);
 
+  currentState.record.toReversed().forEach(item => {
+    let recordsitem = document.createElement("li");
+    recordsitem.textContent = `Field: ${item.size_y}x${item.size_x}, Time: ${item.time}s, Moves: ${item.turn}`;
+    recordsListTitle.after(recordsitem)
+  });
+
   top_panel.append(turns);
   top_panel.append(time);
   top_panel.append(reset);

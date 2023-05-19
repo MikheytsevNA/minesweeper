@@ -17,7 +17,8 @@ let time;
 let state = {
   difficulty: "easy",
   mines: 10,
-  theme: "light"
+  theme: "light",
+  record: []
 }
 
 const colorsLight = {
@@ -231,19 +232,19 @@ function getStorage() {
 }
 
 function recordChange(matrix) {
-  record.unshift({
+  state.record.unshift({
     size_x: matrix.size_x,
     size_y: matrix.size_y,
     time: matrix.timeCounter,
     turn: matrix.turnsCounts+1,
   });
-  recordMakeNewItem(record[0]);
+  recordMakeNewItem(state.record[0]);
 }
 
 function recordMakeNewItem(item) {
   let recordList = document.querySelector(".records_list");
-  if (record.length > 10) {
-    record.pop();
+  if (state.record.length > 10) {
+    state.record.pop();
     recordList.removeChild(recordList.lastChild);
   }
   let recordTitle = document.querySelector(".records_title");
