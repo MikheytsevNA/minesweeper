@@ -1,16 +1,24 @@
 import minesweeperMatrix from "./mainClass.js";
 import { makecanvas, makeUI } from "./makeUI.js";
 
-let n = 25;
-let m = 25;
-let minesCount = 1;
+let n = 10;
+let m = 10;
+let minesCount = 10;
 let width = 18;
 let height = 18;
-let scale = 1;
-let colors = "light"
+let scale = 2;
 width = width * scale;
 height = height * scale;
 let record = [];
+
+let timerID = null;
+let time;
+
+let state = {
+  difficulty: "easy",
+  mines: 10,
+  theme: "light"
+}
 
 const colorsLight = {
   cellColors: ["#f2f8fe", "#0a7cf5", "#ebf206"],
@@ -29,6 +37,7 @@ const colorsLight = {
   background: "#fff",
   counters: ["#fff", "#000"]
 };
+let colors = colorsLight;
 
 const colorsDark = {
   cellColors: ["#1d131f", "#27a49d", "#f6f6f8"],
@@ -258,15 +267,6 @@ function toggleTimer(matrix) {
       matrix.timeCounter = time;
     }, 1000);
   }
-}
-
-let timerID = null;
-let time;
-
-let state = {
-  difficulty: "easy",
-  mines: 10,
-  theme: "light"
 }
 
 main(false);
