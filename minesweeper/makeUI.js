@@ -355,56 +355,55 @@ function cellFilling(
     // flag cell
     ctx.fillStyle = flagColors[0];
     ctx.beginPath();
-    ctx.arc(x + width / 4, y + height / 4, (width - 10) / 2, 0, 2 * Math.PI);
+    ctx.arc(x + width / 4, y + height / 4, ((width - 10) / 2), 0, 2 * Math.PI);
     ctx.fill();
     ctx.fillStyle = backgroundColor;
     ctx.beginPath();
-    ctx.arc(x + width / 4, y + height / 4, (width - 15) / 2, 0, 2 * Math.PI);
+    ctx.arc(x + width / 4, y + height / 4, ((width - 15) / 2 / scale)*1.5, 0, 2 * Math.PI);
     ctx.fill();
     ctx.beginPath();
     ctx.strokeStyle = flagColors[1];
     ctx.moveTo(x + width / 4 - (width - 10) / 2, y + height / 4);
-    ctx.lineTo(x + width / 4 - (width - 15) / 2, y + height / 4);
+    ctx.lineTo(x + width / 4 - ((width - 15) / 2 / scale)*1.5, y + height / 4);
     ctx.stroke();
     ctx.beginPath();
-    ctx.moveTo(x + width / 4 + (width - 15) / 2, y + height / 4);
+    ctx.moveTo(x + width / 4 + ((width - 15) / 2 / scale)*1.5, y + height / 4);
     ctx.lineTo(x + width / 4 + (width - 10) / 2, y + height / 4);
     ctx.stroke();
     ctx.beginPath();
-    ctx.moveTo(x + width / 4, y + height / 4 + (height - 15) / 2);
+    ctx.moveTo(x + width / 4, y + height / 4 + ((height - 15) / 2 / scale)*1.5);
     ctx.lineTo(x + width / 4, y + height / 4 + (height - 10) / 2);
     ctx.stroke();
     ctx.beginPath();
     ctx.moveTo(x + width / 4, y + height / 4 - (height - 10) / 2);
-    ctx.lineTo(x + width / 4, y + height / 4 - (height - 15) / 2);
+    ctx.lineTo(x + width / 4, y + height / 4 - ((height - 15) / 2 / scale)*1.5);
     ctx.stroke();
   } else if (num === -3) {
     // crossed flag
     ctx.fillStyle = flagColors[0];
     ctx.beginPath();
-    ctx.arc(x + width / 4, y + height / 4, (width - 10) / 2, 0, 2 * Math.PI);
+    ctx.arc(x + width / 4, y + height / 4, ((width - 10) / 2), 0, 2 * Math.PI);
     ctx.fill();
     ctx.fillStyle = backgroundColor;
     ctx.beginPath();
-    ctx.arc(x + width / 4, y + height / 4, (width - 15) / 2, 0, 2 * Math.PI);
+    ctx.arc(x + width / 4, y + height / 4, ((width - 15) / 2 / scale)*1.5, 0, 2 * Math.PI);
     ctx.fill();
-
     ctx.beginPath();
     ctx.strokeStyle = flagColors[1];
     ctx.moveTo(x + width / 4 - (width - 10) / 2, y + height / 4);
-    ctx.lineTo(x + width / 4 - (width - 15) / 2, y + height / 4);
+    ctx.lineTo(x + width / 4 - ((width - 15) / 2 / scale)*1.5, y + height / 4);
     ctx.stroke();
     ctx.beginPath();
-    ctx.moveTo(x + width / 4 + (width - 15) / 2, y + height / 4);
+    ctx.moveTo(x + width / 4 + ((width - 15) / 2 / scale)*1.5, y + height / 4);
     ctx.lineTo(x + width / 4 + (width - 10) / 2, y + height / 4);
     ctx.stroke();
     ctx.beginPath();
-    ctx.moveTo(x + width / 4, y + height / 4 + (height - 15) / 2);
+    ctx.moveTo(x + width / 4, y + height / 4 + ((height - 15) / 2 / scale)*1.5);
     ctx.lineTo(x + width / 4, y + height / 4 + (height - 10) / 2);
     ctx.stroke();
     ctx.beginPath();
     ctx.moveTo(x + width / 4, y + height / 4 - (height - 10) / 2);
-    ctx.lineTo(x + width / 4, y + height / 4 - (height - 15) / 2);
+    ctx.lineTo(x + width / 4, y + height / 4 - ((height - 15) / 2 / scale)*1.5);
     ctx.stroke();
 
     ctx.beginPath();
