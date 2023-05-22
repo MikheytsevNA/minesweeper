@@ -101,7 +101,9 @@ function makeUI(currentState) {
       darkTheme.checked = true;
       break;
   }
-
+  const themeTitle = document.createElement("div");
+  themeTitle.textContent = "Theme";
+  theme.append(themeTitle);
   theme.append(lightTheme);
   theme.append(lightLabel);
 
@@ -149,6 +151,9 @@ function makeUI(currentState) {
       break;
   }
 
+  const difficultyTitle = document.createElement("div");
+  difficultyTitle.textContent = "Difficulty";
+  difficulty.append(difficultyTitle);
   difficulty.append(easyDif);
   difficulty.append(easyLabel);
   difficulty.append(mediumDif);
@@ -166,11 +171,54 @@ function makeUI(currentState) {
   minesSlider.classList = "mines_slider";
   const minesValue = document.createElement("span");
   minesValue.classList = "mines_value";
+
+  const minesTitle = document.createElement("div");
+  minesTitle.textContent = "Mines";
+  mines.append(minesTitle);
   mines.append(minesSlider);
   mines.append(minesValue);
+
+  const sound = document.createElement("div");
+  sound.classList = "sound";
+  const soundOn = document.createElement("input");
+  soundOn.setAttribute("type", "radio");
+  soundOn.setAttribute("name", "sound");
+  soundOn.setAttribute("value", "On");
+  soundOn.setAttribute("id", "sound_on");
+  const soundOnLabel = document.createElement("label");
+  soundOnLabel.setAttribute("for", "sound_on");
+  soundOnLabel.textContent = "On";
+
+  const soundOff = document.createElement("input");
+  soundOff.setAttribute("type", "radio");
+  soundOff.setAttribute("name", "sound");
+  soundOff.setAttribute("value", "Off");
+  soundOff.setAttribute("id", "sound_off");
+  const soundOffLabel = document.createElement("label");
+  soundOffLabel.setAttribute("for", "sound_off");
+  soundOffLabel.textContent = "Off";
+
+  const soundTitle = document.createElement("div");
+  soundTitle.textContent = "Sound";
+  sound.append(soundTitle);
+  sound.append(soundOn);
+  sound.append(soundOnLabel);
+  sound.append(soundOff);
+  sound.append(soundOffLabel);
+
+  switch (currentState.sound) {
+    case "On":
+      soundOn.checked = true;
+      break;
+    case "Off":
+      soundOff.checked = true;
+      break;
+  }
+
   settingsMenu.append(theme);
   settingsMenu.append(difficulty);
   settingsMenu.append(mines);
+  settingsMenu.append(sound);
 
   const records = document.createElement("img");
   records.classList = "records";
@@ -189,10 +237,10 @@ function makeUI(currentState) {
   recordsListTitle.classList = "records_title";
   recordsList.append(recordsListTitle);
 
-  currentState.record.toReversed().forEach(item => {
+  currentState.record.toReversed().forEach((item) => {
     let recordsitem = document.createElement("li");
     recordsitem.textContent = `Field: ${item.size_y}x${item.size_x}, Time: ${item.time}s, Moves: ${item.turn}`;
-    recordsListTitle.after(recordsitem)
+    recordsListTitle.after(recordsitem);
   });
 
   top_panel.append(turns);
@@ -211,7 +259,7 @@ function makecanvas(n, m, scale, matrix, colors) {
   if (document.querySelector("canvas")) {
     document.querySelector("canvas").remove("canvas");
   }
-  const container = document.querySelector(".container")
+  const container = document.querySelector(".container");
   document.body.style.backgroundColor = colors.background;
   const canvas = document.createElement("canvas");
 
@@ -355,55 +403,91 @@ function cellFilling(
     // flag cell
     ctx.fillStyle = flagColors[0];
     ctx.beginPath();
-    ctx.arc(x + width / 4, y + height / 4, ((width - 10) / 2), 0, 2 * Math.PI);
+    ctx.arc(x + width / 4, y + height / 4, (width - 10) / 2, 0, 2 * Math.PI);
     ctx.fill();
     ctx.fillStyle = backgroundColor;
     ctx.beginPath();
-    ctx.arc(x + width / 4, y + height / 4, ((width - 15) / 2 / scale)*1.5, 0, 2 * Math.PI);
+    ctx.arc(
+      x + width / 4,
+      y + height / 4,
+      ((width - 15) / 2 / scale) * 1.5,
+      0,
+      2 * Math.PI
+    );
     ctx.fill();
     ctx.beginPath();
     ctx.strokeStyle = flagColors[1];
     ctx.moveTo(x + width / 4 - (width - 10) / 2, y + height / 4);
-    ctx.lineTo(x + width / 4 - ((width - 15) / 2 / scale)*1.5, y + height / 4);
+    ctx.lineTo(
+      x + width / 4 - ((width - 15) / 2 / scale) * 1.5,
+      y + height / 4
+    );
     ctx.stroke();
     ctx.beginPath();
-    ctx.moveTo(x + width / 4 + ((width - 15) / 2 / scale)*1.5, y + height / 4);
+    ctx.moveTo(
+      x + width / 4 + ((width - 15) / 2 / scale) * 1.5,
+      y + height / 4
+    );
     ctx.lineTo(x + width / 4 + (width - 10) / 2, y + height / 4);
     ctx.stroke();
     ctx.beginPath();
-    ctx.moveTo(x + width / 4, y + height / 4 + ((height - 15) / 2 / scale)*1.5);
+    ctx.moveTo(
+      x + width / 4,
+      y + height / 4 + ((height - 15) / 2 / scale) * 1.5
+    );
     ctx.lineTo(x + width / 4, y + height / 4 + (height - 10) / 2);
     ctx.stroke();
     ctx.beginPath();
     ctx.moveTo(x + width / 4, y + height / 4 - (height - 10) / 2);
-    ctx.lineTo(x + width / 4, y + height / 4 - ((height - 15) / 2 / scale)*1.5);
+    ctx.lineTo(
+      x + width / 4,
+      y + height / 4 - ((height - 15) / 2 / scale) * 1.5
+    );
     ctx.stroke();
   } else if (num === -3) {
     // crossed flag
     ctx.fillStyle = flagColors[0];
     ctx.beginPath();
-    ctx.arc(x + width / 4, y + height / 4, ((width - 10) / 2), 0, 2 * Math.PI);
+    ctx.arc(x + width / 4, y + height / 4, (width - 10) / 2, 0, 2 * Math.PI);
     ctx.fill();
     ctx.fillStyle = backgroundColor;
     ctx.beginPath();
-    ctx.arc(x + width / 4, y + height / 4, ((width - 15) / 2 / scale)*1.5, 0, 2 * Math.PI);
+    ctx.arc(
+      x + width / 4,
+      y + height / 4,
+      ((width - 15) / 2 / scale) * 1.5,
+      0,
+      2 * Math.PI
+    );
     ctx.fill();
     ctx.beginPath();
     ctx.strokeStyle = flagColors[1];
     ctx.moveTo(x + width / 4 - (width - 10) / 2, y + height / 4);
-    ctx.lineTo(x + width / 4 - ((width - 15) / 2 / scale)*1.5, y + height / 4);
+    ctx.lineTo(
+      x + width / 4 - ((width - 15) / 2 / scale) * 1.5,
+      y + height / 4
+    );
     ctx.stroke();
     ctx.beginPath();
-    ctx.moveTo(x + width / 4 + ((width - 15) / 2 / scale)*1.5, y + height / 4);
+    ctx.moveTo(
+      x + width / 4 + ((width - 15) / 2 / scale) * 1.5,
+      y + height / 4
+    );
     ctx.lineTo(x + width / 4 + (width - 10) / 2, y + height / 4);
     ctx.stroke();
     ctx.beginPath();
-    ctx.moveTo(x + width / 4, y + height / 4 + ((height - 15) / 2 / scale)*1.5);
+    ctx.moveTo(
+      x + width / 4,
+      y + height / 4 + ((height - 15) / 2 / scale) * 1.5
+    );
     ctx.lineTo(x + width / 4, y + height / 4 + (height - 10) / 2);
     ctx.stroke();
     ctx.beginPath();
     ctx.moveTo(x + width / 4, y + height / 4 - (height - 10) / 2);
-    ctx.lineTo(x + width / 4, y + height / 4 - ((height - 15) / 2 / scale)*1.5);
+    ctx.lineTo(
+      x + width / 4,
+      y + height / 4 - ((height - 15) / 2 / scale) * 1.5
+    );
     ctx.stroke();
 
     ctx.beginPath();

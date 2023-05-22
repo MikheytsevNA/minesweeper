@@ -23,6 +23,7 @@
   height: auto;
   background-color: white;
   color: black;
+  padding: 20px;
 }
 
 .settings_menu.settings_menu_active {
@@ -58,8 +59,50 @@
   height: auto;
   background-color: white;
   color: black;
+  padding: 30px;
 }
 
 .records_list.records_list_active {
   display: block;
+}
+
+.records_list li {
+  margin: 0 0 5px 0;
+}
+
+.theme {
+  margin: 0 0 10px 0;
+}
+
+.theme div {
+  margin: 0 0 5px 0;
+  font-weight: bold;
+}
+
+.difficulty {
+  margin: 0 0 10px 0;
+}
+
+.difficulty div {
+  margin: 0 0 5px 0;
+  font-weight: bold;
+}
+
+.mines {
+  margin: 0 0 10px 0;
+}
+
+.mines div {
+  margin: 0 0 5px 0;
+  font-weight: bold;
+}
+
+.sound div {
+  margin: 0 0 5px 0;
+  font-weight: bold;
+}
+
+.records_title {
+  font-weight: bold;
+  margin: 0 0 10px 0;
 }

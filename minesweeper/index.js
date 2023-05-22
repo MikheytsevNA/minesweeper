@@ -10,6 +10,7 @@ let scale = 2;
 width = width * scale;
 height = height * scale;
 let record = [];
+let soundOn = true;
 
 let timerID = null;
 let time;
@@ -18,7 +19,8 @@ let state = {
   difficulty: "easy",
   mines: 10,
   theme: "light",
-  record: []
+  record: [],
+  sound: "On"
 }
 
 const colorsLight = {
@@ -126,7 +128,9 @@ function main(reset) {
       paddingLeft,
       paddingTop
     );
-    audioOpen.play();
+    if (soundOn) {
+      audioOpen.play();
+    }
     if (matrix) {
       if (matrix.openedMatrix[cell[0]][cell[1]] === -1) {
         matrix.openCell(cell);
@@ -190,12 +194,16 @@ function main(reset) {
 function checkEnd(matrix, cell) {
   let isEnd = matrix.checkWin();
   if (isEnd === 2) {
-    audioLose.play();
+    if (soundOn) {
+      audioLose.play();
+    }
     alert("Game over. Try again");
     toggleTimer(false);
     matrix.openedMatrix[cell[0]][cell[1]] = 10; // 10 is value for pressed mine
   } else if (isEnd === 1) {
-    audioWin.play();
+    if (soundOn) {
+      audioWin.play();
+    }
     alert(
       `Hooray! You found all mines in ${time} seconds and ${matrix.turnsCounts + 1} moves!`
     );
@@ -301,7 +309,15 @@ function applyState(state) {
   } else {
     colors = colorsDark;
   }
+
+  if (state.sound === "On") {
+    soundOn = true;
+  } else {
+    soundOn = false;
+  }
+  
 }
+
 
 function eventListenersHandler() {
   const resetButton = document.querySelector(".reset");
@@ -319,14 +335,36 @@ function eventListenersHandler() {
 
   const recordButton = document.querySelector(".records");
   const recordList = document.querySelector(".records_list");
+  let controllerRecord = new AbortController();
   recordButton.addEventListener("click", () => {
     recordList.classList.toggle("records_list_active");
+    document.addEventListener("mousedown", (event) => {
+      if (event.target === recordButton) {
+        return;
+      }
+      if (!event.target.closest(".records_list")) {
+        recordList.classList.remove("records_list_active");
+        controllerRecord.abort();
+        controllerRecord = new AbortController();
+      }
+    }, { signal: controllerRecord.signal })
   });
 
   const settingsButton = document.querySelector(".settings");
   const settingsList = document.querySelector(".settings_menu");
+  let controllerSettings = new AbortController();
   settingsButton.addEventListener("click", () => {
     settingsList.classList.toggle("settings_menu_active");
+    document.addEventListener("mousedown", (event) => {
+      if (!event.target.closest(".settings_menu")) {
+        if (event.target === settingsButton) {
+          return;
+        }
+        settingsList.classList.remove("settings_menu_active");
+        controllerSettings.abort();
+        controllerSettings = new AbortController();
+      }
+    }, { signal: controllerSettings.signal })
   });
   let slider = document.querySelector(".mines_slider");
   let output = document.querySelector(".mines_value");
@@ -344,6 +382,11 @@ function eventListenersHandler() {
   let themeRadio = document.querySelector(".theme");
   themeRadio.addEventListener("change", (event) => {
     state.theme = event.target.value;
+  })
+
+  let soundRadio = document.querySelector(".sound");
+  soundRadio.addEventListener("change", (event) => {
+    state.sound = event.target.value;
   })
 }
 
