@@ -1,7 +1,10 @@
-Minesweeper app
+# Minesweeper app
 
-Old windows minesweeper game done using vanilla js.
+## Description
+Old windows minesweeper game. All basic functionality: game itself, different difficulties, save on page reload, winners board, a bit of sound effects.
 
-All basic functionality, local storage saving of winners.
+## Stack
+Tech stack: JS, HTML, CSS. Main focus: local storage and canvas.
 
-Deploy [here](https://mikheytsevna.github.io/minesweeper/minesweeper/)
+## Deploy
+Deploy is [here](https://mikheytsevna.github.io/minesweeper/minesweeper/)
